@@ -1,3 +1,4 @@
+import 'package:clo_ai/features/chat/presentation/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,12 +13,20 @@ import '../widgets/vent_controls.dart';
 import '../widgets/vent_info_card.dart';
 
 class AIVentScreen extends StatelessWidget {
-  const AIVentScreen({super.key});
+  final String personName;
+  final String relationshipType;
+
+  const AIVentScreen({
+    super.key,
+    this.personName = 'Ayush',
+    this.relationshipType = 'Professional',
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => AICubit(),
+      create: (_) =>
+          AICubit(personName: personName, relationshipType: relationshipType),
       child: const _AIVentScreenView(),
     );
   }
@@ -42,12 +51,16 @@ class _AIVentScreenView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top App Bar (Static, zero state rebuilds)
-              const VentAppBar(),
+              // Top App Bar (Static with Back Navigation)
+              VentAppBar(
+                onBackPressed: () {
+                  Navigator.of(context).maybePop();
+                },
+              ),
 
               SizedBox(height: 16.h),
 
-              // Relationship Header Card
+              // Dynamic Relationship Header Card
               BlocSelector<AICubit, AIState, ({String name, String category})>(
                 selector: (state) =>
                     (name: state.relationshipName, category: state.category),
@@ -79,6 +92,17 @@ class _AIVentScreenView extends StatelessWidget {
                     activeIndex: activeIndex,
                     onControlTap: (index) {
                       context.read<AICubit>().selectControl(index);
+                      if (index == 0) {
+                        final state = context.read<AICubit>().state;
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => ChatScreen(
+                              personName: state.relationshipName,
+                              relationshipType: state.category,
+                            ),
+                          ),
+                        );
+                      }
                     },
                   );
                 },

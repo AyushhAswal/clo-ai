@@ -18,7 +18,7 @@ class HomeBottomNavigation extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onTabSelected;
 
-  // Strict 3-Tab Navigation System: 0 = Home, 1 = AI, 2 = Profile
+  // Strict 3-Tab Navigation System: 0 = Home, 1 = My Circle, 2 = Profile
   static const List<_TabItemData> _tabs = [
     _TabItemData(
       unselectedIcon: Icons.home_outlined,
@@ -26,9 +26,9 @@ class HomeBottomNavigation extends StatelessWidget {
       label: 'Home',
     ),
     _TabItemData(
-      unselectedIcon: Icons.explore_outlined,
-      selectedIcon: Icons.explore_rounded,
-      label: 'AI',
+      unselectedIcon: Icons.bubble_chart_outlined,
+      selectedIcon: Icons.bubble_chart_rounded,
+      label: 'My Circle',
     ),
     _TabItemData(
       unselectedIcon: Icons.person_outline_rounded,
@@ -74,7 +74,7 @@ class HomeBottomNavigation extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                // Sliding White Active Pill Background (Slides ONLY between Home ↔ AI ↔ Profile)
+                // Sliding White Active Pill Background (Slides ONLY between Home ↔ My Circle ↔ Profile)
                 AnimatedAlign(
                   alignment: Alignment(-1.0 + (activeIndex * 1.0), 0.0),
                   duration: const Duration(milliseconds: 300),

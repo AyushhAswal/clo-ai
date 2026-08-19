@@ -10,6 +10,7 @@ class AddRelationshipItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -70,6 +71,7 @@ class ExistingRelationshipItem extends StatelessWidget {
     final String initial = name.isNotEmpty ? name[0].toUpperCase() : 'A';
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,

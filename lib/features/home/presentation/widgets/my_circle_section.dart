@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../ai/presentation/screens/ai_vent_screen.dart';
+import '../../domain/models/relationship_person.dart';
 import 'relationship_card.dart';
 
 class MyCircleSection extends StatelessWidget {
-  const MyCircleSection({super.key});
+  final List<RelationshipPerson> relationships;
+  final VoidCallback? onViewAllTap;
+
+  const MyCircleSection({
+    super.key,
+    this.onViewAllTap,
+    this.relationships = const [
+      RelationshipPerson(id: '1', name: 'Ayush', category: 'Professional'),
+    ],
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +35,16 @@ class MyCircleSection extends StatelessWidget {
                 letterSpacing: 0.1,
               ),
             ),
-            Text(
-              'View All',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 12.5.sp,
-                fontWeight: FontWeight.w400,
-                decoration: TextDecoration.underline,
+            GestureDetector(
+              onTap: onViewAllTap,
+              child: Text(
+                'View All',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12.5.sp,
+                  fontWeight: FontWeight.w400,
+                  decoration: TextDecoration.underline,
+                ),
               ),
             ),
           ],
@@ -50,22 +64,36 @@ class MyCircleSection extends StatelessWidget {
               width: 1.0,
             ),
           ),
-          child: Row(
-            children: [
-              AddRelationshipItem(
-                onTap: () {
-                  // Phase 1 UI action stub
-                },
-              ),
-              SizedBox(width: 20.w),
-              ExistingRelationshipItem(
-                name: 'Ayush',
-                category: 'Professional',
-                onTap: () {
-                  // Phase 1 UI action stub
-                },
-              ),
-            ],
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                AddRelationshipItem(
+                  onTap: () {
+                    // Phase 1 UI action stub
+                  },
+                ),
+                ...relationships.map(
+                  (person) => Padding(
+                    padding: EdgeInsets.only(left: 20.w),
+                    child: ExistingRelationshipItem(
+                      name: person.name,
+                      category: person.category,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => AIVentScreen(
+                              personName: person.name,
+                              relationshipType: person.category,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],

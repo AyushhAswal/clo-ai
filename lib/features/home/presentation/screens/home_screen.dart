@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
-import '../../../ai/presentation/screens/ai_vent_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../cubit/home_cubit.dart';
 import '../../cubit/home_state.dart';
@@ -11,6 +10,7 @@ import '../widgets/home_bottom_navigation.dart';
 import '../widgets/home_header.dart';
 import '../widgets/home_orb_section.dart';
 import '../widgets/my_circle_section.dart';
+import 'my_circle_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -33,13 +33,13 @@ class _HomeScreenView extends StatelessWidget {
       backgroundColor: AppColors.backgroundDark,
       body: Stack(
         children: [
-          // Content Body according to selectedNavIndex (0 = Home, 1 = AI, 2 = Profile)
+          // Content Body according to selectedNavIndex (0 = Home, 1 = My Circle, 2 = Profile)
           Positioned.fill(
             child: BlocSelector<HomeCubit, HomeState, int>(
               selector: (state) => state.selectedNavIndex,
               builder: (context, selectedIndex) {
                 if (selectedIndex == 1) {
-                  return const AIVentScreen();
+                  return const MyCircleScreen();
                 }
 
                 if (selectedIndex == 2) {
@@ -51,7 +51,7 @@ class _HomeScreenView extends StatelessWidget {
             ),
           ),
 
-          // Centered Floating 3-Tab Bottom Navigation Bar (Home | AI | Profile)
+          // Centered Floating 3-Tab Bottom Navigation Bar (Home | My Circle | Profile)
           Positioned(
             left: 0,
             right: 0,
@@ -106,8 +106,12 @@ class _HomeBody extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // My Circle Section
-            const MyCircleSection(),
+            // My Circle Preview Section
+            MyCircleSection(
+              onViewAllTap: () {
+                context.read<HomeCubit>().selectTab(1);
+              },
+            ),
 
             const SizedBox(height: 28),
 
