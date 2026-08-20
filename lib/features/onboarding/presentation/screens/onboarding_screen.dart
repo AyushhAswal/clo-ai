@@ -84,6 +84,7 @@ class _OnboardingScreenViewState extends State<_OnboardingScreenView> {
             },
             builder: (context, state) {
               final bool isFirstPage = state.isFirstPage;
+              final bool isSecondPage = state.currentPage == 1;
               final bool isLastPage = state.isLastPage;
 
               return Column(
@@ -102,9 +103,11 @@ class _OnboardingScreenViewState extends State<_OnboardingScreenView> {
 
                   SizedBox(height: 24.h),
 
-                  // Fixed Height Content Region for Text PageView
+                  // Content Region for Text PageView
                   SizedBox(
-                    height: 215,
+                    height: isFirstPage
+                        ? 250.h
+                        : (isSecondPage ? 230.h : 215.h),
                     child: PageView.builder(
                       controller: _pageController,
                       itemCount: pages.length,
@@ -120,7 +123,7 @@ class _OnboardingScreenViewState extends State<_OnboardingScreenView> {
 
                   SizedBox(height: 24.h),
 
-                  // Bottom Controls Bar (Indicator & Right Action Buttons)
+                  // Bottom Controls Bar (Page Indicator & Navigation Buttons)
                   Padding(
                     padding: EdgeInsets.only(bottom: AppSpacing.md.h),
                     child: SizedBox(
@@ -128,6 +131,19 @@ class _OnboardingScreenViewState extends State<_OnboardingScreenView> {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
+                          // Left-aligned Circular Back Button (On all pages except Page 1)
+                          if (!isFirstPage)
+                            Positioned(
+                              left: 0,
+                              child: CircularBackButton(
+                                onPressed: () {
+                                  context
+                                      .read<OnboardingCubit>()
+                                      .previousPage();
+                                },
+                              ),
+                            ),
+
                           // Centered 4-Step Page Indicator
                           Center(
                             child: OnboardingPageIndicator(
@@ -136,40 +152,24 @@ class _OnboardingScreenViewState extends State<_OnboardingScreenView> {
                             ),
                           ),
 
-                          // Right-aligned Action Buttons (< >)
+                          // Right-aligned Action Button (Next or Get Started)
                           Positioned(
                             right: 0,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (!isFirstPage) ...[
-                                  CircularBackButton(
-                                    onPressed: () {
-                                      context
-                                          .read<OnboardingCubit>()
-                                          .previousPage();
-                                    },
-                                  ),
-                                  SizedBox(width: 8.w),
-                                ],
-                                if (!isLastPage)
-                                  CircularNextButton(
+                            child: !isLastPage
+                                ? CircularNextButton(
                                     onPressed: () {
                                       context
                                           .read<OnboardingCubit>()
                                           .nextPage();
                                     },
                                   )
-                                else
-                                  GetStartedButton(
+                                : GetStartedButton(
                                     onPressed: () {
                                       context
                                           .read<OnboardingCubit>()
                                           .nextPage();
                                     },
                                   ),
-                              ],
-                            ),
                           ),
                         ],
                       ),
