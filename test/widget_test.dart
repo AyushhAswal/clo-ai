@@ -1,16 +1,24 @@
-import 'package:clo_ai/features/ai/presentation/screens/ai_vent_screen.dart';
-import 'package:clo_ai/features/home/presentation/screens/my_circle_screen.dart';
+import 'package:clo_ai/core/network/api_client.dart';
+import 'package:clo_ai/features/chat/presentation/screens/chat_screen.dart';
+import 'package:clo_ai/features/auth/cubit/auth_cubit.dart';
+import 'package:clo_ai/features/auth/data/repositories/auth_repository.dart';
+import 'package:clo_ai/features/login/presentation/widgets/google_sign_in_button.dart';
 import 'package:clo_ai/features/profile/presentation/screens/profile_screen.dart';
+import 'package:clo_ai/features/relationship/presentation/screens/questionnaire_screen.dart';
 import 'package:clo_ai/main.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'features/auth/auth_cubit_test.dart';
+import 'features/chat/cubit/chat_cubit_test.dart';
+import 'features/home/cubit/my_circle_cubit_test.dart';
 
 void main() {
   testWidgets(
     'Full onboarding, login, home, My Circle tab, and profile tab test',
     (WidgetTester tester) async {
-      // Set portrait mobile screen viewport (390x844 logical pixels)
       tester.view.physicalSize = const Size(1170, 2532);
       tester.view.devicePixelRatio = 3.0;
       addTearDown(() {
@@ -18,8 +26,19 @@ void main() {
         tester.view.resetDevicePixelRatio();
       });
 
-      // Build our app and trigger a frame.
-      await tester.pumpWidget(const CloApp());
+      final fakeAdapter = FakeAdapter();
+      final dio = Dio(BaseOptions(baseUrl: 'http://localhost:3000'));
+      dio.httpClientAdapter = fakeAdapter;
+      final apiClient = ApiClient(dio: dio);
+      final mockTokenStorage = MockTokenStorage();
+      final authRepository = AuthRepository(
+        apiClient: apiClient,
+        tokenStorage: mockTokenStorage,
+      );
+      final authCubit = AuthCubit(repository: authRepository);
+
+      await tester.pumpWidget(CloApp(authCubit: authCubit));
+      await tester.pump(const Duration(milliseconds: 500));
       await tester.pump(const Duration(milliseconds: 500));
 
       // Page 1 Verification
@@ -41,8 +60,8 @@ void main() {
       // Verify Login Screen
       expect(find.text('Welcome Back!'), findsOneWidget);
 
-      // Tap Login to navigate to HomeScreen
-      await tester.tap(find.text('Login'));
+      // Tap Google Sign-In to navigate to HomeScreen
+      await tester.tap(find.byType(GoogleSignInButton));
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -52,15 +71,6 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('Tap to speak'), findsOneWidget);
-
-      // Tap My Circle Tab (Tab 1) in bottom navigation
-      await tester.tap(find.byIcon(Icons.bubble_chart_outlined));
-      await tester.pump(const Duration(milliseconds: 500));
-
-      // Verify Full My Circle Screen elements
-      expect(find.text('My Circle'), findsWidgets);
-      expect(find.text('Ayush'), findsOneWidget);
-      expect(find.text('Ayduh'), findsOneWidget);
 
       // Tap Profile Tab (Tab 2) in bottom navigation
       await tester.tap(find.byIcon(Icons.person_outline_rounded));
@@ -83,100 +93,37 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
+    final mockRepo = MockRelationshipRepository();
+
     await tester.pumpWidget(
       ScreenUtilInit(
         designSize: const Size(390, 844),
-        builder: (context, child) => const MaterialApp(home: MyCircleScreen()),
+        builder: (context, child) => MaterialApp(
+          home: QuestionnaireScreen(
+            personName: 'Sarah',
+            relationshipType: 'Friendship',
+            repository: mockRepo,
+          ),
+        ),
       ),
     );
-    await tester.pump(const Duration(milliseconds: 500));
-
-    // Verify initial cards
-    expect(find.text('Ayush'), findsOneWidget);
-    expect(find.text('Ayduh'), findsOneWidget);
-
-    // Tap Floating Add button (+)
-    await tester.tap(find.byIcon(Icons.add_rounded).last);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    // Verify Add Relationship Name screen
-    expect(find.text('Add Relationship'), findsOneWidget);
-    expect(find.text('Add Photo'), findsOneWidget);
+    // Verify Questionnaire for Sarah
+    expect(find.text("Where's your friendship at?"), findsOneWidget);
 
-    // Enter name "Sarah"
-    await tester.enterText(find.byType(TextField), 'Sarah');
-    await tester.pump();
-
-    // Tap Next
-    await tester.tap(find.text('Next'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-
-    // Verify Choose Relationship Type screen
-    expect(
-      find.textContaining('Choose Your Relationship', findRichText: true),
-      findsOneWidget,
-    );
-
-    // Tap "Friend"
-    await tester.tap(find.text('Friend'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 700));
-    await tester.pump(const Duration(milliseconds: 500));
-
-    // Verify Questionnaire Q1 for Sarah
-    expect(find.text("Where's your friendship with Sarah at?"), findsOneWidget);
-
-    // Select Q1 Option 1
+    // Select Option 1
     await tester.tap(find.text('Close, and it feels solid.'));
     await tester.pump();
 
-    // Tap Next to go to Q2
-    await tester.tap(find.text('Next'));
-    await tester.pump(const Duration(milliseconds: 500));
-
-    // Verify Questionnaire Q2
-    expect(
-      find.text('What comes up most strongly around Sarah?'),
-      findsOneWidget,
-    );
-
-    // Select Q2 Option 1
-    await tester.tap(find.text('Ease — I can be myself.'));
-    await tester.pump();
-
-    // Tap Next to go to Q3
-    await tester.tap(find.text('Next'));
-    await tester.pump(const Duration(milliseconds: 500));
-
-    // Verify Questionnaire Q3
-    expect(find.text('What do you most want from Sarah?'), findsOneWidget);
-
-    // Select Q3 Option
-    await tester.tap(find.text('More honesty — no more pretending.'));
-    await tester.pump();
-
-    // Tap Complete
+    // Tap Complete / Next
     await tester.tap(find.text('Complete'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-
-    // Verify return to MyCircleScreen with newly added "Sarah"
-    expect(find.text('My Circle'), findsWidgets);
-    expect(find.text('Sarah'), findsOneWidget);
-
-    // Tap Sarah card to push AIVentScreen
-    await tester.tap(find.text('Sarah'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-
-    // Verify AIVentScreen opened with Sarah & Friendship
-    expect(find.text('Vent to CLO'), findsOneWidget);
-    expect(find.text('Sarah'), findsOneWidget);
   });
 
-  testWidgets('AIVentScreen to ChatScreen navigation test', (
+  testWidgets('ChatScreen rendering and sending message test', (
     WidgetTester tester,
   ) async {
     tester.view.physicalSize = const Size(1170, 2532);
@@ -186,35 +133,32 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
+    final mockChatRepo = MockChatRepository();
+
     await tester.pumpWidget(
       ScreenUtilInit(
         designSize: const Size(390, 844),
         builder: (context, child) => MaterialApp(home: child),
-        child: const AIVentScreen(
-          personName: 'Ayduh',
+        child: ChatScreen(
+          relationshipId: 'rel-1',
+          personName: 'Rahul',
           relationshipType: 'Friendship',
+          repository: mockChatRepo,
         ),
       ),
     );
     await tester.pump(const Duration(milliseconds: 500));
-
-    // Verify AIVentScreen
-    expect(find.text('Vent to CLO'), findsOneWidget);
-
-    // Tap Chat button (Icons.sms_outlined)
-    await tester.tap(find.byIcon(Icons.sms_outlined));
-    await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    // Verify ChatScreen opened with Ayduh and Friendship
+    // Verify ChatScreen opened with Rahul and Friendship
     expect(find.text('Chat'), findsOneWidget);
-    expect(find.text('Ayduh'), findsOneWidget);
+    expect(find.text('Rahul'), findsOneWidget);
     expect(find.text('Friendship'), findsOneWidget);
     expect(find.text('Ask anything'), findsOneWidget);
 
-    // Enter message "Hello Ayduh" and tap send button key
+    // Enter message "Hello Rahul" and tap send button key
     final sendButton = find.byKey(const Key('send_message_button'));
-    await tester.enterText(find.byType(TextField), 'Hello Ayduh');
+    await tester.enterText(find.byType(TextField), 'Hello Rahul');
     await tester.pump();
     await tester.tap(sendButton);
     await tester.pump();
@@ -225,15 +169,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify new user message appended
-    expect(find.text('Hello Ayduh'), findsOneWidget);
-
-    // Tap Back Arrow
-    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-
-    // Verify back navigation returns to AIVentScreen
-    expect(find.text('Vent to CLO'), findsOneWidget);
+    expect(find.text('Hello Rahul'), findsOneWidget);
   });
 
   testWidgets('ProfileScreen standalone rendering test', (

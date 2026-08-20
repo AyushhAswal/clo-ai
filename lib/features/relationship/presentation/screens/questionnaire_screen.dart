@@ -1,18 +1,21 @@
 import 'package:clo_ai/core/constants/app_colors.dart';
+import 'package:clo_ai/core/network/api_exception.dart';
 import 'package:clo_ai/features/home/data/repositories/relationship_repository.dart';
-import 'package:clo_ai/features/home/domain/models/relationship_model.dart';
 import 'package:clo_ai/features/relationship/domain/models/question_model.dart';
+import 'package:clo_ai/features/relationship/domain/models/relationship_answer_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class QuestionnaireScreen extends StatefulWidget {
   final String personName;
   final String relationshipType;
+  final RelationshipRepository? repository;
 
   const QuestionnaireScreen({
     super.key,
     required this.personName,
     required this.relationshipType,
+    this.repository,
   });
 
   @override
@@ -20,17 +23,41 @@ class QuestionnaireScreen extends StatefulWidget {
 }
 
 class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
-  late final List<QuestionModel> _questions;
+  List<QuestionModel> _questions = [];
+  bool _isLoadingQuestions = true;
+  String? _questionsError;
+  bool _isSubmitting = false;
+
   int _currentStep = 0;
   final Map<int, String> _selectedAnswers = {};
 
   @override
   void initState() {
     super.initState();
-    _questions = LocalRelationshipRepository().getQuestionsForType(
-      widget.relationshipType,
-      widget.personName,
-    );
+    _fetchQuestions();
+  }
+
+  Future<void> _fetchQuestions() async {
+    setState(() {
+      _isLoadingQuestions = true;
+      _questionsError = null;
+    });
+
+    try {
+      final repository = widget.repository ?? ApiRelationshipRepository();
+      final questions = await repository.getQuestions(
+        relationshipType: widget.relationshipType,
+      );
+      setState(() {
+        _questions = questions;
+        _isLoadingQuestions = false;
+      });
+    } catch (e) {
+      setState(() {
+        _questionsError = e.toString();
+        _isLoadingQuestions = false;
+      });
+    }
   }
 
   void _onOptionSelected(String option) {
@@ -51,30 +78,121 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     }
   }
 
-  void _completeQuestionnaire() {
-    // Map category string correctly (e.g. Friend -> Friends, Friendship -> Friends)
+  Future<void> _completeQuestionnaire() async {
+    if (_isSubmitting) return;
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
     String category = widget.relationshipType;
     if (category.toLowerCase().contains('friend')) {
       category = 'Friends';
     }
 
-    final newRelationship = RelationshipModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: widget.personName,
-      relationshipType: widget.relationshipType.toLowerCase().contains('friend')
-          ? 'Friendship'
-          : widget.relationshipType,
-      category: category,
-    );
+    final String relType =
+        widget.relationshipType.toLowerCase().contains('friend')
+        ? 'Friendship'
+        : widget.relationshipType;
 
-    LocalRelationshipRepository().addRelationship(newRelationship);
+    final List<RelationshipAnswerRequest> answerRequests = [];
+    for (int i = 0; i < _questions.length; i++) {
+      final q = _questions[i];
+      final String? selected = _selectedAnswers[i];
+      if (selected != null) {
+        answerRequests.add(
+          RelationshipAnswerRequest(
+            questionId: q.id,
+            questionText: q.questionText,
+            answer: selected,
+          ),
+        );
+      }
+    }
 
-    // Pop back to MyCircleScreen root
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    try {
+      final repository = widget.repository ?? ApiRelationshipRepository();
+      await repository.createRelationship(
+        name: widget.personName,
+        relationshipType: relType,
+        category: category,
+        photoUrl: null,
+        answers: answerRequests,
+      );
+
+      if (!mounted) return;
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create relationship: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingQuestions) {
+      return Scaffold(
+        backgroundColor: AppColors.backgroundDark,
+        body: const Center(
+          child: CircularProgressIndicator(color: AppColors.primaryAccent),
+        ),
+      );
+    }
+
+    if (_questionsError != null || _questions.isEmpty) {
+      return Scaffold(
+        backgroundColor: AppColors.backgroundDark,
+        body: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline_rounded,
+                  color: Colors.white70,
+                  size: 48.r,
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  _questionsError ?? 'No questions available',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontSize: 15.sp),
+                ),
+                SizedBox(height: 20.h),
+                ElevatedButton(
+                  onPressed: _fetchQuestions,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                  ),
+                  child: const Text(
+                    'Retry',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final currentQuestion = _questions[_currentStep];
     final String? currentAnswer = _selectedAnswers[_currentStep];
     final bool hasSelection = currentAnswer != null;
@@ -160,7 +278,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
                     ],
                   ),
 
-                  // Progress Segment Bar (e.g. 1/3, 2/3, 3/3)
+                  // Progress Segment Bar
                   Row(
                     children: List.generate(_questions.length, (index) {
                       final bool isDone = index <= _currentStep;
@@ -270,7 +388,6 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
               // Bottom Action Controls
               Row(
                 children: [
-                  // Voice / Tap to add yours button
                   Expanded(
                     child: Container(
                       height: 50.h,
@@ -312,30 +429,43 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
 
                   // Next / Complete Button
                   GestureDetector(
-                    onTap: _onNextPressed,
+                    onTap: _isSubmitting ? null : _onNextPressed,
                     child: Container(
                       width: 100.w,
                       height: 50.h,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(25.r),
-                        gradient: hasSelection
+                        gradient: hasSelection && !_isSubmitting
                             ? const LinearGradient(
                                 colors: [Color(0xFF9B3B83), Color(0xFFE86B5A)],
                               )
                             : null,
-                        color: hasSelection ? null : const Color(0xFF2A2A38),
+                        color: hasSelection && !_isSubmitting
+                            ? null
+                            : const Color(0xFF2A2A38),
                       ),
                       child: Center(
-                        child: Text(
-                          isLastStep ? 'Complete' : 'Next',
-                          style: TextStyle(
-                            color: hasSelection
-                                ? Colors.white
-                                : Colors.white.withValues(alpha: 0.4),
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child: _isSubmitting
+                            ? SizedBox(
+                                width: 20.r,
+                                height: 20.r,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
+                                ),
+                              )
+                            : Text(
+                                isLastStep ? 'Complete' : 'Next',
+                                style: TextStyle(
+                                  color: hasSelection
+                                      ? Colors.white
+                                      : Colors.white.withValues(alpha: 0.4),
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                       ),
                     ),
                   ),

@@ -13,11 +13,13 @@ import '../widgets/vent_controls.dart';
 import '../widgets/vent_info_card.dart';
 
 class AIVentScreen extends StatelessWidget {
+  final String relationshipId;
   final String personName;
   final String relationshipType;
 
   const AIVentScreen({
     super.key,
+    this.relationshipId = 'rel-default',
     this.personName = 'Ayush',
     this.relationshipType = 'Professional',
   });
@@ -27,13 +29,15 @@ class AIVentScreen extends StatelessWidget {
     return BlocProvider(
       create: (_) =>
           AICubit(personName: personName, relationshipType: relationshipType),
-      child: const _AIVentScreenView(),
+      child: _AIVentScreenView(relationshipId: relationshipId),
     );
   }
 }
 
 class _AIVentScreenView extends StatelessWidget {
-  const _AIVentScreenView();
+  final String relationshipId;
+
+  const _AIVentScreenView({required this.relationshipId});
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +101,7 @@ class _AIVentScreenView extends StatelessWidget {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => ChatScreen(
+                              relationshipId: relationshipId,
                               personName: state.relationshipName,
                               relationshipType: state.category,
                             ),

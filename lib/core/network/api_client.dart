@@ -4,10 +4,20 @@ import 'api_exception.dart';
 import 'auth_interceptor.dart';
 
 class ApiClient {
+  static ApiClient? _instance;
   late final Dio _dio;
-  final AuthInterceptor _authInterceptor = AuthInterceptor();
+  late final AuthInterceptor _authInterceptor;
 
-  ApiClient({Dio? dio, String? baseUrl}) {
+  factory ApiClient({Dio? dio, String? baseUrl}) {
+    if (dio != null || baseUrl != null) {
+      return ApiClient._internal(dio: dio, baseUrl: baseUrl);
+    }
+    _instance ??= ApiClient._internal();
+    return _instance!;
+  }
+
+  ApiClient._internal({Dio? dio, String? baseUrl}) {
+    _authInterceptor = AuthInterceptor();
     _dio =
         dio ??
         Dio(
@@ -27,6 +37,7 @@ class ApiClient {
   }
 
   Dio get dio => _dio;
+  AuthInterceptor get authInterceptor => _authInterceptor;
 
   void setAuthToken(String? token) {
     _authInterceptor.setToken(token);

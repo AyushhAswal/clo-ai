@@ -12,6 +12,9 @@ class AuthRepository {
     : _apiClient = apiClient ?? ApiClient(),
       _tokenStorage = tokenStorage ?? TokenStorage();
 
+  ApiClient get apiClient => _apiClient;
+  TokenStorage get tokenStorage => _tokenStorage;
+
   Future<UserAuthModel> register({
     required String name,
     required String email,
@@ -62,11 +65,15 @@ class AuthRepository {
       return null;
     }
 
+    // Set token into AuthInterceptor FIRST
     _apiClient.setAuthToken(token);
+
     try {
       return await getMe();
     } on ApiException catch (e) {
       if (e.statusCode == 401) {
+        await logout();
+      } else {
         await logout();
       }
       return null;

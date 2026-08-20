@@ -2,19 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../ai/presentation/screens/ai_vent_screen.dart';
-import '../../domain/models/relationship_person.dart';
+import '../../../relationship/presentation/screens/add_relationship_name_screen.dart';
+import '../../domain/models/relationship_model.dart';
 import 'relationship_card.dart';
 
 class MyCircleSection extends StatelessWidget {
-  final List<RelationshipPerson> relationships;
+  final List<RelationshipModel> relationships;
   final VoidCallback? onViewAllTap;
 
   const MyCircleSection({
     super.key,
     this.onViewAllTap,
-    this.relationships = const [
-      RelationshipPerson(id: '1', name: 'Ayush', category: 'Professional'),
-    ],
+    this.relationships = const [],
   });
 
   @override
@@ -70,7 +69,11 @@ class MyCircleSection extends StatelessWidget {
               children: [
                 AddRelationshipItem(
                   onTap: () {
-                    // Phase 1 UI action stub
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const AddRelationshipNameScreen(),
+                      ),
+                    );
                   },
                 ),
                 ...relationships.map(
@@ -78,7 +81,7 @@ class MyCircleSection extends StatelessWidget {
                     padding: EdgeInsets.only(left: 20.w),
                     child: ExistingRelationshipItem(
                       name: person.name,
-                      category: person.category,
+                      category: person.relationshipType,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(

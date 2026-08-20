@@ -10,6 +10,8 @@ class AuthCubit extends Cubit<AuthState> {
     : _repository = repository ?? AuthRepository(),
       super(const AuthInitial());
 
+  AuthRepository get repository => _repository;
+
   Future<void> checkSession() async {
     emit(const AuthLoading());
     try {

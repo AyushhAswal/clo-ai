@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../auth/cubit/auth_cubit.dart';
+import '../../../login/presentation/screens/login_screen.dart';
 import '../../cubit/profile_cubit.dart';
 import '../../cubit/profile_state.dart';
 import '../widgets/profile_action_tile.dart';
@@ -24,6 +26,68 @@ class ProfileScreen extends StatelessWidget {
 class _ProfileScreenView extends StatelessWidget {
   const _ProfileScreenView();
 
+  void _showLogoutConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF161622),
+          title: Text(
+            'Are you sure?',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to logout?',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 14.sp,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+              ),
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                await context.read<AuthCubit>().logout();
+                if (!context.mounted) return;
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  (route) => false,
+                );
+              },
+              child: Text(
+                'Logout',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +99,7 @@ class _ProfileScreenView extends StatelessWidget {
             left: AppSpacing.lg.w,
             right: AppSpacing.lg.w,
             top: AppSpacing.md.h,
-            bottom: 110.h, // Padding for bottom navigation bar
+            bottom: 110.h,
           ),
           child: BlocBuilder<ProfileCubit, ProfileState>(
             builder: (context, state) {
@@ -95,7 +159,7 @@ class _ProfileScreenView extends StatelessWidget {
                     icon: Icons.logout_rounded,
                     title: 'Logout',
                     isDestructive: true,
-                    onTap: () {},
+                    onTap: () => _showLogoutConfirmationDialog(context),
                   ),
                 ],
               );
