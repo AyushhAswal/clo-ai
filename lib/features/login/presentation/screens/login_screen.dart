@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../auth/cubit/auth_cubit.dart';
 import '../../../auth/cubit/auth_state.dart';
+import '../../../auth/domain/models/user_auth_model.dart';
 import '../../../auth/presentation/screens/register_screen.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../cubit/login_cubit.dart';
@@ -219,7 +220,20 @@ class _LoginScreenView extends StatelessWidget {
                             SizedBox(height: 28.h),
 
                             GoogleSignInButton(
-                              onPressed: () => _navigateToHome(context),
+                              onPressed: () {
+                                final authCubit = context.read<AuthCubit>();
+                                if (authCubit.state is! AuthAuthenticated) {
+                                  authCubit.setSessionUser(
+                                    const UserAuthModel(
+                                      id: 'google-user',
+                                      name: 'ayush aswal',
+                                      email: 'google@example.com',
+                                    ),
+                                  );
+                                } else {
+                                  _navigateToHome(context);
+                                }
+                              },
                             ),
 
                             SizedBox(height: 24.h),

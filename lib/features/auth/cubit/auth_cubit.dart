@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/network/api_exception.dart';
 import '../data/repositories/auth_repository.dart';
+import '../domain/models/user_auth_model.dart';
 import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
@@ -11,6 +12,10 @@ class AuthCubit extends Cubit<AuthState> {
       super(const AuthInitial());
 
   AuthRepository get repository => _repository;
+
+  void setSessionUser(UserAuthModel user) {
+    emit(AuthAuthenticated(user));
+  }
 
   Future<void> checkSession() async {
     emit(const AuthLoading());

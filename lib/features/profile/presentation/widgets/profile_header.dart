@@ -1,30 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/name_formatter.dart';
 import 'profile_avatar.dart';
 
 class ProfileHeader extends StatelessWidget {
-  final String username;
+  final String name;
   final String lastUpdated;
 
   const ProfileHeader({
     super.key,
-    required this.username,
+    required this.name,
     required this.lastUpdated,
   });
 
   @override
   Widget build(BuildContext context) {
+    final formattedName = name.toTitleCase();
+
     return Row(
       children: [
-        ProfileAvatar(username: username, size: 72.r),
+        ProfileAvatar(name: formattedName, size: 72.r),
         SizedBox(width: 18.w),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                username,
+                formattedName.isNotEmpty ? formattedName : 'User',
                 style: TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 22.sp,

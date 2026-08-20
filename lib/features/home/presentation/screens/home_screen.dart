@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../auth/cubit/auth_cubit.dart';
+import '../../../auth/cubit/auth_state.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../cubit/home_cubit.dart';
 import '../../cubit/home_state.dart';
+import '../../cubit/my_circle_cubit.dart';
+import '../../cubit/my_circle_state.dart';
 import '../widgets/gentle_check_in.dart';
 import '../widgets/home_bottom_navigation.dart';
 import '../widgets/home_header.dart';
@@ -13,12 +17,20 @@ import '../widgets/my_circle_section.dart';
 import 'my_circle_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final MyCircleCubit? myCircleCubit;
+
+  const HomeScreen({super.key, this.myCircleCubit});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => HomeCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => HomeCubit()),
+        if (myCircleCubit != null)
+          BlocProvider.value(value: myCircleCubit!)
+        else
+          BlocProvider(create: (_) => MyCircleCubit()..loadRelationships()),
+      ],
       child: const _HomeScreenView(),
     );
   }
@@ -91,11 +103,14 @@ class _HomeBody extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Section with username state selector
-            BlocSelector<HomeCubit, HomeState, String>(
-              selector: (state) => state.username,
-              builder: (context, username) {
-                return HomeHeader(username: username);
+            // Header Section with authenticated user name from AuthCubit
+            Builder(
+              builder: (context) {
+                final authState = context.watch<AuthCubit?>()?.state;
+                final name = authState is AuthAuthenticated
+                    ? authState.user.name
+                    : '';
+                return HomeHeader(name: name);
               },
             ),
 
@@ -106,10 +121,15 @@ class _HomeBody extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // My Circle Preview Section
-            MyCircleSection(
-              onViewAllTap: () {
-                context.read<HomeCubit>().selectTab(1);
+            // My Circle Preview Section connected to shared MyCircleCubit
+            BlocBuilder<MyCircleCubit, MyCircleState>(
+              builder: (context, state) {
+                return MyCircleSection(
+                  relationships: state.relationships,
+                  onViewAllTap: () {
+                    context.read<HomeCubit>().selectTab(1);
+                  },
+                );
               },
             ),
 

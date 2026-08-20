@@ -49,7 +49,7 @@ void main() {
           if (options.path == '/auth/me') {
             return ResponsePayload(
               200,
-              '{"id":"u1","name":"Ayush","email":"ayush@example.com"}',
+              '{"id":"u1","name":"ayush aswal","email":"ayush@example.com"}',
             );
           }
           return ResponsePayload(404, '{}');
@@ -65,7 +65,7 @@ void main() {
 
         expect(authCubit.state, isA<AuthAuthenticated>());
         expect(
-          find.textContaining('ayushaswal', findRichText: true),
+          find.textContaining('Ayush Aswal', findRichText: true),
           findsOneWidget,
         );
       },
@@ -87,7 +87,11 @@ void main() {
       final authCubit = AuthCubit(repository: authRepository);
       authCubit.emit(
         const AuthAuthenticated(
-          UserAuthModel(id: 'u1', name: 'Ayush', email: 'ayush@example.com'),
+          UserAuthModel(
+            id: 'u1',
+            name: 'ayush aswal',
+            email: 'ayush@example.com',
+          ),
         ),
       );
 
@@ -137,7 +141,11 @@ void main() {
         final authCubit = AuthCubit(repository: authRepository);
         authCubit.emit(
           const AuthAuthenticated(
-            UserAuthModel(id: 'u1', name: 'Ayush', email: 'ayush@example.com'),
+            UserAuthModel(
+              id: 'u1',
+              name: 'ayush aswal',
+              email: 'ayush@example.com',
+            ),
           ),
         );
 

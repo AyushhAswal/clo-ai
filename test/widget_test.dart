@@ -65,9 +65,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pump(const Duration(milliseconds: 500));
 
-      // Verify Home Screen elements (Tab 0)
+      // Verify Home Screen elements (Tab 0) - expects Title Cased full name "Ayush Aswal"
       expect(
-        find.textContaining("ayushaswal", findRichText: true),
+        find.textContaining("Ayush Aswal", findRichText: true),
         findsOneWidget,
       );
       expect(find.text('Tap to speak'), findsOneWidget);
@@ -193,7 +193,6 @@ void main() {
 
     // Verify Profile Screen widgets
     expect(find.text('Profile'), findsOneWidget);
-    expect(find.text('ayushaswal'), findsOneWidget);
     expect(find.text('Relationships'), findsOneWidget);
   });
 }

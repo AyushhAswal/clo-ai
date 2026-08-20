@@ -25,8 +25,18 @@ class MyCircleScreen extends StatelessWidget {
         child: const _MyCircleScreenView(),
       );
     }
+
+    final parentCubit = context.watch<MyCircleCubit?>();
+    if (parentCubit != null) {
+      return BlocProvider.value(
+        value: parentCubit,
+        child: const _MyCircleScreenView(),
+      );
+    }
+
     return BlocProvider(
-      create: (context) => MyCircleCubit(repository: repository),
+      create: (context) =>
+          MyCircleCubit(repository: repository)..loadRelationships(),
       child: const _MyCircleScreenView(),
     );
   }

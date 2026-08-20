@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import '../../../../core/utils/name_formatter.dart';
 
 class ProfileAvatar extends StatelessWidget {
-  final String username;
+  final String name;
   final double size;
 
-  const ProfileAvatar({super.key, required this.username, this.size = 72});
+  const ProfileAvatar({super.key, required this.name, this.size = 72});
 
   @override
   Widget build(BuildContext context) {
-    final String initial = username.isNotEmpty
-        ? username[0].toUpperCase()
-        : 'A';
+    final formattedName = name.toTitleCase();
+    final String initial = formattedName.isNotEmpty
+        ? formattedName[0].toUpperCase()
+        : 'U';
 
     return Container(
       width: size,

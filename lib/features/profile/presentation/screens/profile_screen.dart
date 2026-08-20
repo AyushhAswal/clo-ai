@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../auth/cubit/auth_cubit.dart';
+import '../../../auth/cubit/auth_state.dart';
 import '../../../login/presentation/screens/login_screen.dart';
 import '../../cubit/profile_cubit.dart';
 import '../../cubit/profile_state.dart';
@@ -119,10 +120,18 @@ class _ProfileScreenView extends StatelessWidget {
 
                   SizedBox(height: 24.h),
 
-                  // Profile Header Section
-                  ProfileHeader(
-                    username: state.username,
-                    lastUpdated: state.lastUpdated,
+                  // Profile Header Section with authenticated user name from AuthCubit
+                  Builder(
+                    builder: (context) {
+                      final authState = context.watch<AuthCubit?>()?.state;
+                      final name = authState is AuthAuthenticated
+                          ? authState.user.name
+                          : '';
+                      return ProfileHeader(
+                        name: name,
+                        lastUpdated: state.lastUpdated,
+                      );
+                    },
                   ),
 
                   SizedBox(height: 28.h),

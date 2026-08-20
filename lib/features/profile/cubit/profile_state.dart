@@ -6,7 +6,7 @@ class ProfileState {
   final int totalMessagesCount;
 
   const ProfileState({
-    this.username = 'ayushaswal',
+    this.username = '',
     this.lastUpdated = 'August 19, 2026',
     this.relationshipsCount = 1,
     this.uploadedChatsCount = 0,
