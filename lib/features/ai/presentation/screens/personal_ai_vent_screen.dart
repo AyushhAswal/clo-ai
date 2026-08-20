@@ -197,7 +197,7 @@ class _PersonalAIVentScreenState extends State<PersonalAIVentScreen> {
               // Center AI Orb (Reused Siri.json Animation)
               const VentAiOrb(),
 
-              SizedBox(height: 28.h),
+              SizedBox(height: 100.h),
 
               // Bottom Action Controls
               VentControls(
