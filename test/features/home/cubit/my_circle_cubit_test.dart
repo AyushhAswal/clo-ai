@@ -195,13 +195,59 @@ void main() {
       );
     });
 
-    test('Search query filtering works correctly', () async {
+    test('Case-insensitive search query filtering works correctly', () async {
+      await cubit.loadRelationships();
+      cubit.selectCategory('All');
+      cubit.setSearchQuery('AYU');
+
+      expect(cubit.state.filteredRelationships.length, equals(1));
+      expect(cubit.state.filteredRelationships.first.name, equals('Ayush'));
+    });
+
+    test('Partial name search query filtering works correctly', () async {
       await cubit.loadRelationships();
       cubit.selectCategory('All');
       cubit.setSearchQuery('rah');
 
       expect(cubit.state.filteredRelationships.length, equals(1));
       expect(cubit.state.filteredRelationships.first.name, equals('Rahul'));
+    });
+
+    test(
+      'Empty search query restores all relationships for category',
+      () async {
+        await cubit.loadRelationships();
+        cubit.selectCategory('All');
+        cubit.setSearchQuery('rah');
+        expect(cubit.state.filteredRelationships.length, equals(1));
+
+        cubit.setSearchQuery('');
+        expect(cubit.state.filteredRelationships.length, equals(4));
+      },
+    );
+
+    test(
+      'Search query combined with category filter works correctly',
+      () async {
+        await cubit.loadRelationships();
+        cubit.selectCategory('Friends');
+        cubit.setSearchQuery('rah');
+
+        expect(cubit.state.filteredRelationships.length, equals(1));
+        expect(cubit.state.filteredRelationships.first.name, equals('Rahul'));
+
+        // Searching for 'rah' in Family category yields 0 results
+        cubit.selectCategory('Family');
+        expect(cubit.state.filteredRelationships.length, equals(0));
+      },
+    );
+
+    test('No matching results returns empty list', () async {
+      await cubit.loadRelationships();
+      cubit.selectCategory('All');
+      cubit.setSearchQuery('nonexistent_name');
+
+      expect(cubit.state.filteredRelationships, isEmpty);
     });
   });
 }

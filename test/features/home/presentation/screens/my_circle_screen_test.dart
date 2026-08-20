@@ -66,13 +66,13 @@ void main() {
       await tester.tap(find.byIcon(Icons.search_rounded));
       await tester.pump(const Duration(milliseconds: 300));
 
-      // Search bar input
+      // Search bar input - partial & case-insensitive matching
       expect(find.byType(TextField), findsOneWidget);
-      await tester.enterText(find.byType(TextField), 'Neha');
+      await tester.enterText(find.byType(TextField), 'rah');
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(
-        find.widgetWithText(ExistingRelationshipItem, 'Neha'),
+        find.widgetWithText(ExistingRelationshipItem, 'Rahul'),
         findsOneWidget,
       );
       expect(find.text('Ayush'), findsNothing);
