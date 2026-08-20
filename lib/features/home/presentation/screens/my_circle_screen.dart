@@ -56,7 +56,7 @@ class _MyCircleScreenViewState extends State<_MyCircleScreenView> {
   final List<Map<String, dynamic>> _categories = const [
     {'label': 'All', 'icon': null},
     {'label': 'Romantic', 'icon': Icons.favorite_border_rounded},
-    {'label': 'Professional', 'icon': Icons.work_outline_rounded},
+    {'label': 'Professional', 'icon': null},
     {'label': 'Friends', 'icon': Icons.people_outline_rounded},
     {'label': 'Family', 'icon': Icons.language_rounded},
   ];
@@ -366,22 +366,26 @@ class _MyCircleScreenViewState extends State<_MyCircleScreenView> {
                       ),
                     ),
                   ] else ...[
-                    // Connection Cards Grid
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
-                      child: Wrap(
-                        spacing: 16.w,
-                        runSpacing: 16.h,
-                        children: [
-                          AddRelationshipItem(onTap: _onAddPressed),
-                          ...filteredRelationships.map(
-                            (person) => ExistingRelationshipItem(
-                              name: person.name,
-                              category: person.relationshipType,
-                              onTap: () => _onPersonTap(person),
-                            ),
-                          ),
-                        ],
+                    // Horizontal Connection Cards List
+                    SizedBox(
+                      height: 165.h,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        itemCount: filteredRelationships.length + 1,
+                        separatorBuilder: (context, index) =>
+                            SizedBox(width: 14.w),
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return AddRelationshipItem(onTap: _onAddPressed);
+                          }
+                          final person = filteredRelationships[index - 1];
+                          return ExistingRelationshipItem(
+                            name: person.name,
+                            category: person.relationshipType,
+                            onTap: () => _onPersonTap(person),
+                          );
+                        },
                       ),
                     ),
                   ],

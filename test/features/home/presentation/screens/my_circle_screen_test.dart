@@ -39,7 +39,7 @@ void main() {
       expect(find.text('Rahul'), findsOneWidget);
 
       // Scroll horizontal category tabs list to reveal 'Friends' and 'Family'
-      await tester.drag(find.byType(ListView).first, const Offset(-250, 0));
+      await tester.drag(find.byType(ListView).first, const Offset(-400, 0));
       await tester.pumpAndSettle();
 
       expect(find.text('Friends'), findsOneWidget);
@@ -56,7 +56,7 @@ void main() {
       expect(find.text('Someone'), findsNothing);
 
       // Scroll back left and tap "All" tab
-      await tester.drag(find.byType(ListView).first, const Offset(250, 0));
+      await tester.drag(find.byType(ListView).first, const Offset(400, 0));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('All'));
