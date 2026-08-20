@@ -89,21 +89,25 @@ class _OnboardingScreenViewState extends State<_OnboardingScreenView> {
 
               return Column(
                 children: [
-                  // Top Bar (Sound/Mute Toggle & Skip Pill Button)
+                  // Top Bar Overlay (Sound Mute Toggle & Skip Button -> jumps to last page)
                   OnboardingTopBar(
                     isMuted: _isMuted,
                     onMuteToggle: _toggleMute,
                     onSkip: () {
-                      context.read<OnboardingCubit>().nextPage();
+                      context.read<OnboardingCubit>().skipToLast();
                     },
                   ),
 
-                  // Hero Orb takes flexible available top space
-                  const Expanded(child: Center(child: AnimatedGradientOrb())),
+                  // Upper Orb Region (Screen 2 uses extended gradient orb)
+                  Expanded(
+                    child: Center(
+                      child: AnimatedGradientOrb(isExtended: isSecondPage),
+                    ),
+                  ),
 
                   SizedBox(height: 24.h),
 
-                  // Content Region for Text PageView
+                  // Text Content PageView Region
                   SizedBox(
                     height: isFirstPage
                         ? 250.h
@@ -123,7 +127,7 @@ class _OnboardingScreenViewState extends State<_OnboardingScreenView> {
 
                   SizedBox(height: 24.h),
 
-                  // Bottom Controls Bar (Page Indicator & Navigation Buttons)
+                  // Responsive Bottom Navigation Stack (Back [left] | Page Indicators [center] | Next/Get Started [right])
                   Padding(
                     padding: EdgeInsets.only(bottom: AppSpacing.md.h),
                     child: SizedBox(
@@ -131,7 +135,7 @@ class _OnboardingScreenViewState extends State<_OnboardingScreenView> {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          // Left-aligned Circular Back Button (On all pages except Page 1)
+                          // Far Left Slot (Circular Back Button on all pages except Page 1)
                           if (!isFirstPage)
                             Positioned(
                               left: 0,
@@ -144,7 +148,7 @@ class _OnboardingScreenViewState extends State<_OnboardingScreenView> {
                               ),
                             ),
 
-                          // Centered 4-Step Page Indicator
+                          // Center Slot (Centered Page Indicators with zero overlap)
                           Center(
                             child: OnboardingPageIndicator(
                               currentPage: state.currentPage,
@@ -152,7 +156,7 @@ class _OnboardingScreenViewState extends State<_OnboardingScreenView> {
                             ),
                           ),
 
-                          // Right-aligned Action Button (Next or Get Started)
+                          // Far Right Slot (White Circular Next Button or Get Started Button)
                           Positioned(
                             right: 0,
                             child: !isLastPage

@@ -11,7 +11,7 @@ class ApiConfig {
 
   static ApiEnvironment environment = ApiEnvironment.local;
 
-/*  static String get baseUrl {
+  /*  static String get baseUrl {
     switch (environment) {
       case ApiEnvironment.local:
         return localBaseUrl;
