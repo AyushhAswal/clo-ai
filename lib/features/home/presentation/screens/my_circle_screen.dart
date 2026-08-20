@@ -1,5 +1,6 @@
 import 'package:clo_ai/core/constants/app_colors.dart';
 import 'package:clo_ai/core/constants/app_spacing.dart';
+import 'package:clo_ai/features/ai/presentation/screens/ai_loading_screen.dart';
 import 'package:clo_ai/features/ai/presentation/screens/ai_vent_screen.dart';
 import 'package:clo_ai/features/home/cubit/my_circle_cubit.dart';
 import 'package:clo_ai/features/home/cubit/my_circle_state.dart';
@@ -69,10 +70,12 @@ class _MyCircleScreenViewState extends State<_MyCircleScreenView> {
   void _onPersonTap(RelationshipModel person) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => AIVentScreen(
-          relationshipId: person.id,
-          personName: person.name,
-          relationshipType: person.category,
+        builder: (context) => AILoadingScreen(
+          targetScreen: AIVentScreen(
+            relationshipId: person.id,
+            personName: person.name,
+            relationshipType: person.category,
+          ),
         ),
       ),
     );

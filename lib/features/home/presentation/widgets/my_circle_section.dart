@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../ai/presentation/screens/ai_loading_screen.dart';
 import '../../../ai/presentation/screens/ai_vent_screen.dart';
 import '../../../relationship/presentation/screens/add_relationship_name_screen.dart';
 import '../../cubit/my_circle_cubit.dart';
@@ -90,10 +91,12 @@ class MyCircleSection extends StatelessWidget {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => AIVentScreen(
-                              relationshipId: person.id,
-                              personName: person.name,
-                              relationshipType: person.category,
+                            builder: (_) => AILoadingScreen(
+                              targetScreen: AIVentScreen(
+                                relationshipId: person.id,
+                                personName: person.name,
+                                relationshipType: person.category,
+                              ),
                             ),
                           ),
                         );
