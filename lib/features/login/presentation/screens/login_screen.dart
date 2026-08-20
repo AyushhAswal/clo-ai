@@ -221,18 +221,12 @@ class _LoginScreenView extends StatelessWidget {
 
                             GoogleSignInButton(
                               onPressed: () {
-                                final authCubit = context.read<AuthCubit>();
-                                if (authCubit.state is! AuthAuthenticated) {
-                                  authCubit.setSessionUser(
-                                    const UserAuthModel(
-                                      id: 'google-user',
-                                      name: 'ayush aswal',
-                                      email: 'google@example.com',
-                                    ),
-                                  );
-                                } else {
-                                  _navigateToHome(context);
-                                }
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Google Sign-In is coming soon!'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
                               },
                             ),
 

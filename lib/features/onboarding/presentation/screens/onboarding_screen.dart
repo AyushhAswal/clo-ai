@@ -101,7 +101,7 @@ class _OnboardingScreenViewState extends State<_OnboardingScreenView> {
                   // Upper Orb Region (Screen 2 uses extended gradient orb)
                   Expanded(
                     child: Center(
-                      child: AnimatedGradientOrb(isExtended: isSecondPage),
+                      child: AnimatedGradientOrb(),
                     ),
                   ),
 
@@ -149,10 +149,15 @@ class _OnboardingScreenViewState extends State<_OnboardingScreenView> {
                             ),
 
                           // Center Slot (Centered Page Indicators with zero overlap)
-                          Center(
-                            child: OnboardingPageIndicator(
-                              currentPage: state.currentPage,
-                              pageCount: pages.length,
+                          Padding(
+                            padding: EdgeInsets.only(
+                              right: isLastPage ? 100.w : 0,
+                            ),
+                            child: Center(
+                              child: OnboardingPageIndicator(
+                                currentPage: state.currentPage,
+                                pageCount: pages.length,
+                              ),
                             ),
                           ),
 

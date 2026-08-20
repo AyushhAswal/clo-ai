@@ -86,7 +86,7 @@ class _AIVentScreenView extends StatelessWidget {
               // Center AI Orb (Performance Isolated Siri.json Animation)
               const VentAiOrb(),
 
-              SizedBox(height: 28.h),
+              SizedBox(height: 100.h),
 
               // Bottom Vent Action Controls (Scoped rebuilds)
               BlocSelector<AICubit, AIState, int>(
