@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../auth/cubit/auth_cubit.dart';
 import 'login_state.dart';
 
 class LoginCubit extends Cubit<LoginState> {
@@ -16,11 +17,13 @@ class LoginCubit extends Cubit<LoginState> {
     emit(state.copyWith(isPasswordVisible: !state.isPasswordVisible));
   }
 
-  void submitLogin() {
-    // Phase 1 UI-only stub handler
-    emit(state.copyWith(isLoading: true));
-    Future.delayed(const Duration(milliseconds: 500), () {
-      emit(state.copyWith(isLoading: false));
-    });
+  void submitLogin(AuthCubit authCubit) {
+    if (state.email.trim().isEmpty || state.password.isEmpty) {
+      emit(
+        state.copyWith(errorMessage: 'Please enter both email and password'),
+      );
+      return;
+    }
+    authCubit.login(email: state.email.trim(), password: state.password);
   }
 }
